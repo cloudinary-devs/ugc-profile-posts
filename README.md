@@ -1,6 +1,24 @@
+# UGC Sample App for Profile Pictures and Posts
+
 This is a social media-style application that handles user-generated content (UGC) using Cloudinary's advanced capabilities. The app features a Profile page where users can manage their personal information and upload a profile picture, along with a Posts page where they can share thoughts and images.
 
-It's a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+It's a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app), built on Next.js 14 and the Next.js App Router.
+
+## Overview
+
+The app serves as a demonstration platform for handling user-generated content in a social media context. It implements these main features:
+
+On the Profile page:
+
+* The uploaded image is moderated for appropriate content and checked for malware before being displayed on the page.
+* If the image is poor quality, then the quality is improved.
+* The image is displayed as a square, focusing on the face, if there is one, or the most interesting part of the image, if not.
+
+On the Posts page:
+
+* The post is displayed against the profile picture, which is resized and made circular with an outline.
+* The uploaded image, if there is one, is moderated for appropriate content and checked for malware before being displayed on the page.
+* The post image is displayed with padding, if required, to show the whole image in a dedicated space.
 
 ## Run the app
 
