@@ -22,8 +22,7 @@ export default function RootLayout({
         <UserProvider>
           <nav className="bg-gray-800 text-white p-4">
             <ul className="flex space-x-4">
-              <li><Link href="/" className="hover:text-gray-300">My Profile</Link></li>
-              <li><Link href="/posts" className="hover:text-gray-300">My Posts</Link></li>
+              <li><Link href="/" className="hover:text-gray-300">Bluetooth Adapter</Link></li>
             </ul>
           </nav>
           {children}
