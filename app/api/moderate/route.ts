@@ -9,6 +9,8 @@ const moderationResults = new Map<string, { status: string, message: string }>()
 export async function POST(request: Request) {
 
   const data = await request.json()
+
+  console.log("data: ", data )
   
   // Check if this is a webhook from Cloudinary
   if (data.notification_type === 'moderation' || data.notification_type === 'moderation_summary') {
@@ -20,14 +22,14 @@ export async function POST(request: Request) {
     // Check the moderation status
     if (moderation_status === 'rejected') {
       status = 'rejected'
-      if (moderation_kind === 'aws_rek') {
-        message = 'Your image was rejected due to unsuitable content'
+      if (moderation_kind === 'aws_rek_video') {
+        message = 'Your video was rejected due to unsuitable content'
       } else if (moderation_kind === 'perception_point') {
-        message = 'Your image was rejected due to potential malware'
+        message = 'Your video was rejected due to potential malware'
       }
     } else if (moderation_status === 'approved') {
       status = 'approved'
-      message = 'Image approved'
+      message = 'Video approved'
     }
 
     // Store the result
@@ -51,15 +53,8 @@ export async function POST(request: Request) {
 
   if (moderationResult.status === 'approved') {
 
-    let poorQuality = false
-
-    if (data.tags && data.tags.includes('poor_quality')) {
-      poorQuality = true
-    }
- 
     return NextResponse.json({ 
       status: 'approved',
-      poorQuality: poorQuality, 
       publicId: public_id
     })
   } else {

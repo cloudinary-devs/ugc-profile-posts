@@ -18,7 +18,7 @@ export function CloudinaryVideoPlayer({ publicId }: CloudinaryVideoPlayerProps) 
       
       script.onload = () => {
         const videoPlayerScript = document.createElement("script")
-        videoPlayerScript.src = "https://unpkg.com/cloudinary-video-player@1.9.9/dist/cld-video-player.min.js"
+        videoPlayerScript.src = "https://unpkg.com/cloudinary-video-player@2.2.0/dist/cld-video-player.min.js"
         videoPlayerScript.async = true
         videoPlayerScript.onload = () => setIsScriptLoaded(true)
         videoPlayerScript.onerror = (error) => console.error("Error loading Cloudinary Video Player script:", error)
@@ -29,13 +29,13 @@ export function CloudinaryVideoPlayer({ publicId }: CloudinaryVideoPlayerProps) 
       document.head.appendChild(script)
 
       const link = document.createElement("link")
-      link.href = "https://unpkg.com/cloudinary-video-player@1.9.9/dist/cld-video-player.min.css"
+      link.href = "https://unpkg.com/cloudinary-video-player@2.2.0/dist/cld-video-player.min.css"
       link.rel = "stylesheet"
       document.head.appendChild(link)
 
       return () => {
         document.head.removeChild(script)
-        const videoPlayerScript = document.querySelector('script[src="https://unpkg.com/cloudinary-video-player@1.9.9/dist/cld-video-player.min.js"]')
+        const videoPlayerScript = document.querySelector('script[src="https://unpkg.com/cloudinary-video-player@2.2.0/dist/cld-video-player.min.js"]')
         if (videoPlayerScript) {
           document.head.removeChild(videoPlayerScript)
         }
@@ -51,8 +51,21 @@ export function CloudinaryVideoPlayer({ publicId }: CloudinaryVideoPlayerProps) 
       const player = window.cloudinary.videoPlayer(videoRef.current, {
         cloud_name: "cld-demo-ugc",
         controls: true,
+        chaptersButton: true
       })
-      player.source(publicId)
+      player.source({publicId,         
+        textTracks: {
+            subtitles: [{
+                default: true,
+                label: 'English',
+                language: 'en',
+                maxWords: 5,
+                wordHighlight: false
+            }
+        ]
+        },
+        chapters: true
+     })
 
       return () => {
         player.dispose()

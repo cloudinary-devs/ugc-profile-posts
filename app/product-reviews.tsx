@@ -40,7 +40,7 @@ export function ProductReviews() {
         {
           cloudName: "cld-demo-ugc",
           uploadPreset: "ugc-video",
-          sources: ["local", "camera"],
+          sources: ["local"],
           resourceType: "video",
         },
         (error: any, result: any) => {
