@@ -6,7 +6,7 @@ interface Window {
         destroy: () => void
       }
       videoPlayer: (element: HTMLVideoElement, options: any) => {
-        source: (publicId: string) => void
+        source: (publicId: string, options?: any) => void
         dispose: () => void
       }
     }

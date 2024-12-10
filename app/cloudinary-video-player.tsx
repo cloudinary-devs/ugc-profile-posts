@@ -12,21 +12,21 @@ export function CloudinaryVideoPlayer({ publicId }: CloudinaryVideoPlayerProps) 
 
   useEffect(() => {
     if (!window.cloudinary || !window.cloudinary.videoPlayer) {
-      const script = document.createElement("script")
-      script.src = "https://unpkg.com/cloudinary-core@latest/cloudinary-core-shrinkwrap.min.js"
-      script.async = true
+      const coreScript = document.createElement("script")
+      coreScript.src = "https://unpkg.com/cloudinary-core@latest/cloudinary-core-shrinkwrap.min.js"
+      coreScript.async = true
       
-      script.onload = () => {
+      coreScript.onload = () => {
         const videoPlayerScript = document.createElement("script")
         videoPlayerScript.src = "https://unpkg.com/cloudinary-video-player@2.2.0/dist/cld-video-player.min.js"
         videoPlayerScript.async = true
         videoPlayerScript.onload = () => setIsScriptLoaded(true)
-        videoPlayerScript.onerror = (error) => console.error("Error loading Cloudinary Video Player script:", error)
+        videoPlayerScript.onerror = (error) => console.error("Error loading Cloudinary Video Player 2.2.0 script:", error)
         document.head.appendChild(videoPlayerScript)
       }
       
-      script.onerror = (error) => console.error("Error loading Cloudinary Core script:", error)
-      document.head.appendChild(script)
+      coreScript.onerror = (error) => console.error("Error loading Cloudinary Core script:", error)
+      document.head.appendChild(coreScript)
 
       const link = document.createElement("link")
       link.href = "https://unpkg.com/cloudinary-video-player@2.2.0/dist/cld-video-player.min.css"
@@ -34,7 +34,7 @@ export function CloudinaryVideoPlayer({ publicId }: CloudinaryVideoPlayerProps) 
       document.head.appendChild(link)
 
       return () => {
-        document.head.removeChild(script)
+        document.head.removeChild(coreScript)
         const videoPlayerScript = document.querySelector('script[src="https://unpkg.com/cloudinary-video-player@2.2.0/dist/cld-video-player.min.js"]')
         if (videoPlayerScript) {
           document.head.removeChild(videoPlayerScript)
@@ -51,21 +51,27 @@ export function CloudinaryVideoPlayer({ publicId }: CloudinaryVideoPlayerProps) 
       const player = window.cloudinary.videoPlayer(videoRef.current, {
         cloud_name: "cld-demo-ugc",
         controls: true,
-        chaptersButton: true
+        chaptersButton: true,
+        width: 600,
+        posterOptions: {aspect_ratio: "16:9", crop: "fill", gravity: "auto", width: 600}
       })
-      player.source({publicId,         
+
+      player.source({
+        publicId,
+        transformation: [{aspect_ratio: "16:9", crop: "fill", gravity: "auto", width: 600}],
         textTracks: {
-            subtitles: [{
-                default: true,
-                label: 'English',
-                language: 'en',
-                maxWords: 5,
-                wordHighlight: false
-            }
-        ]
+          subtitles: [{
+            default: true,
+            label: 'English',
+            language: 'en',
+            maxWords: 5,
+            wordHighlight: false
+          }]
         },
         chapters: true
-     })
+      })
+
+      
 
       return () => {
         player.dispose()
@@ -76,7 +82,7 @@ export function CloudinaryVideoPlayer({ publicId }: CloudinaryVideoPlayerProps) 
   return (
     <video 
       ref={videoRef}
-      className="cld-video-player w-full"
+      className="cld-video-player"
       controls
     />
   )

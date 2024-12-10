@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle } from 'lucide-react'
 import { CloudinaryVideoPlayer } from "./cloudinary-video-player"
 
 interface Review {
@@ -11,28 +13,40 @@ interface Review {
   text: string
   videoUrl?: string
   date: string
+  status: 'processing' | 'approved' | 'rejected'
+  rejectionReason?: string
+  eagerTransformationComplete?: boolean
 }
 
 export function ProductReviews() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [newReview, setNewReview] = useState("")
   const [uploadWidget, setUploadWidget] = useState<any>(null)
+  const [isCloudinaryLoaded, setIsCloudinaryLoaded] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !window.cloudinary) {
       const script = document.createElement("script")
       script.src = "https://upload-widget.cloudinary.com/global/all.js"
       script.async = true
-      script.onload = initializeUploadWidget
+      script.onload = () => {
+        setIsCloudinaryLoaded(true)
+      }
       document.body.appendChild(script)
 
       return () => {
         document.body.removeChild(script)
       }
-    } else if (window.cloudinary && !uploadWidget) {
-      initializeUploadWidget()
+    } else if (window.cloudinary) {
+      setIsCloudinaryLoaded(true)
     }
   }, [])
+
+  useEffect(() => {
+    if (isCloudinaryLoaded && !uploadWidget) {
+      initializeUploadWidget()
+    }
+  }, [isCloudinaryLoaded])
 
   const initializeUploadWidget = useCallback(() => {
     if (window.cloudinary && !uploadWidget) {
@@ -49,20 +63,72 @@ export function ProductReviews() {
             return
           }
           if (result && result.event === "success") {
-            const newReviewWithVideo = {
-              id: Date.now().toString(),
+            const newReviewWithVideo: Review = {
+              id: result.info.asset_id,
               text: newReview,
               videoUrl: result.info.public_id,
-              date: new Date().toLocaleDateString()
+              date: new Date().toLocaleDateString(),
+              status: 'processing'
             }
             setReviews(prevReviews => [newReviewWithVideo, ...prevReviews])
             setNewReview("")
+            checkVideoStatus(result.info.asset_id, result.info.public_id)
           }
         }
       )
       setUploadWidget(widget)
     }
   }, [newReview])
+
+  const checkVideoStatus = useCallback(async (assetId: string, publicId: string) => {
+    const startTime = Date.now()
+    const timeoutDuration = 360000 // 6 minutes in milliseconds
+
+    const checkStatus = async () => {
+      try {
+        const response = await fetch('/api/moderate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ checkStatus: true, asset_id: assetId, public_id: publicId })
+        })
+        const data = await response.json()
+
+        if (data.status === 'approved') {
+          setReviews(prevReviews => 
+            prevReviews.map(review => 
+              review.id === assetId 
+                ? { ...review, status: 'approved', eagerTransformationComplete: data.eagerTransformationComplete }
+                : review
+            )
+          )
+        } else if (data.status === 'rejected') {
+          setReviews(prevReviews => 
+            prevReviews.map(review => 
+              review.id === assetId 
+                ? { ...review, status: 'rejected', rejectionReason: data.message }
+                : review
+            )
+          )
+        } else if (Date.now() - startTime < timeoutDuration) {
+          // If still processing and within timeout, check again after 5 seconds
+          setTimeout(() => checkStatus(), 5000)
+        } else {
+          // Timeout reached
+          setReviews(prevReviews => 
+            prevReviews.map(review => 
+              review.id === assetId 
+                ? { ...review, status: 'rejected', rejectionReason: 'Processing timeout reached' }
+                : review
+            )
+          )
+        }
+      } catch (error) {
+        console.error("Error checking video status:", error)
+      }
+    }
+
+    checkStatus()
+  }, [])
 
   const handleUploadVideo = () => {
     if (uploadWidget) {
@@ -75,10 +141,11 @@ export function ProductReviews() {
   const handleSubmitTextReview = () => {
     if (!newReview.trim()) return
 
-    const textOnlyReview = {
+    const textOnlyReview: Review = {
       id: Date.now().toString(),
       text: newReview,
-      date: new Date().toLocaleDateString()
+      date: new Date().toLocaleDateString(),
+      status: 'approved'
     }
     setReviews(prevReviews => [textOnlyReview, ...prevReviews])
     setNewReview("")
@@ -99,7 +166,7 @@ export function ProductReviews() {
           />
           <div className="flex gap-4">
             <Button onClick={handleSubmitTextReview}>Submit Text Review</Button>
-            <Button variant="secondary" onClick={handleUploadVideo}>
+            <Button variant="secondary" onClick={handleUploadVideo} disabled={!isCloudinaryLoaded}>
               Add Video Review
             </Button>
           </div>
@@ -112,8 +179,24 @@ export function ProductReviews() {
           <Card key={review.id}>
             <CardContent className="p-6 space-y-4">
               {review.videoUrl && (
-                <div className="aspect-video">
-                  <CloudinaryVideoPlayer publicId={review.videoUrl} />
+                <div>
+                {review.status === 'processing' ? (
+                    <div className="flex items-center justify-center h-full bg-gray-200">
+                    <p>Processing video...</p>
+                    </div>
+                ) : review.status === 'approved' ? (
+                    <CloudinaryVideoPlayer 
+                    publicId={review.videoUrl} 
+                    />
+                ) : (
+                    <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Video Rejected</AlertTitle>
+                    <AlertDescription>
+                        {review.rejectionReason || "The video was rejected during moderation."}
+                    </AlertDescription>
+                    </Alert>
+                )}
                 </div>
               )}
               <p className="text-lg">{review.text}</p>
