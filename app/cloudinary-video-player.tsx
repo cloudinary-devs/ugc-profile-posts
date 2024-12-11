@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react"
+import { CLOUDINARY_CONFIG } from './config/cloudinary'
 
 interface CloudinaryVideoPlayerProps {
   publicId: string
@@ -49,7 +50,7 @@ export function CloudinaryVideoPlayer({ publicId }: CloudinaryVideoPlayerProps) 
   useEffect(() => {
     if (isScriptLoaded && videoRef.current && window.cloudinary && window.cloudinary.videoPlayer) {
       const player = window.cloudinary.videoPlayer(videoRef.current, {
-        cloud_name: "cld-demo-ugc",
+        cloud_name: CLOUDINARY_CONFIG.cloudName,
         controls: true,
         chaptersButton: true,
         width: 600,
