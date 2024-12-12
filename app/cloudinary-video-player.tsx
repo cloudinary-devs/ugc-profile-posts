@@ -61,13 +61,28 @@ export function CloudinaryVideoPlayer({ publicId }: CloudinaryVideoPlayerProps) 
         publicId,
         transformation: [{aspect_ratio: "16:9", crop: "fill", gravity: "auto", width: 600}],
         textTracks: {
-          subtitles: [{
+          captions: {
+            label: 'English(captions)',
             default: true,
-            label: 'English',
-            language: 'en',
             maxWords: 5,
-            wordHighlight: false
-          }]
+          },
+          subtitles: [
+            {
+              label: 'French',
+              language: 'fr-FR',
+              maxWords: 5,
+            },
+            {
+              label: 'Spanish',
+              language: 'es-ES',
+              maxWords: 5,
+            },
+            {
+              label: 'German',
+              language: 'de-DE',
+              maxWords: 5,
+            }
+          ]
         },
         chapters: true
       })
