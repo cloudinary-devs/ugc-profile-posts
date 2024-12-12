@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from 'lucide-react'
 import { CloudinaryVideoPlayer } from "./cloudinary-video-player"
-import { CLOUDINARY_CONFIG } from "./config/cloudinary"
+import { CLOUDINARY_CONFIG } from "../config/cloudinary"
 
 interface Review {
   id: string

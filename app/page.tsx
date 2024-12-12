@@ -1,23 +1,22 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { ProductReviews } from "./product-reviews"
-import {Cloudinary, CloudinaryImage} from "@cloudinary/url-gen";
+import { ProductReviews } from "./components/product-reviews"
+import { Cloudinary } from "@cloudinary/url-gen";
 import { fill } from '@cloudinary/url-gen/actions/resize'
 import { autoGravity } from "@cloudinary/url-gen/qualifiers/gravity"
 import { byRadius } from "@cloudinary/url-gen/actions/roundCorners"
 
 export default function ProductPage() {
 
-    const cld = new Cloudinary({
-        cloud: {
-          cloudName: 'demo'
-        }
-      });
+  const cld = new Cloudinary({
+    cloud: {
+      cloudName: 'demo'
+    }
+  });
 
-    const myImage = cld.image('docs/bluetooth_dongle').
-    resize(fill().width(450).height(450).gravity(autoGravity())).
-      roundCorners(byRadius(5)).format('auto').quality('auto')
-    let imgUrl = myImage.toURL()
-    console.log("imgeUrl: ", imgUrl)
+  const myImage = cld.image('docs/bluetooth_dongle').
+  resize(fill().width(450).height(450).gravity(autoGravity())).
+    roundCorners(byRadius(5)).format('auto').quality('auto')
+  let imgUrl = myImage.toURL()
 
   return (
 

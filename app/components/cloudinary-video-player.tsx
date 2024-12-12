@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react"
-import { CLOUDINARY_CONFIG } from './config/cloudinary'
+import { CLOUDINARY_CONFIG } from '../config/cloudinary'
 
 interface CloudinaryVideoPlayerProps {
   publicId: string

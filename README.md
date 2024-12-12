@@ -15,7 +15,7 @@ To run the app yourself:
 1. Clone or fork this GitHub repo.
 1. In **app/config/cloudinary.ts**, replace **MY_CLOUD_NAME** with your Cloudinary product environment cloud name. You can find your **Cloud name** near the top of the Programmable Media [Dashboard](https://console.cloudinary.com/pm/developer-dashboard) of the Cloudinary Console. [Sign up for free](https://cloudinary.com/users/register_free) if you don't yet have a Cloudinary account.
 1. To try out your app locally, you need to set up a secure tunnel connecting the internet to your locally-running application so that the webhooks sent by Cloudinary on upload are caught and handled by the app. You can use a tool such as [Ngrok](https://ngrok.com/) to do this. Otherwise, you need to deploy the app using a service such as [Vercel](https://vercel.com/). Whichever method you choose, make a note of your app's domain (for example, `a-b-c-d.ngrok-free.app` or `a-b-c-d.vercel.app`). By default, the app runs on port 3000.
-1. Create an upload preset called **ugc-video**. (You can use a different name, but if you do, you also need update the `uploadPreset` value in **cloudinary.ts**.) See instructions on how to [configure your upload preset](https://cloudinary.com/documentation/profile_picture_sample_project#upload_preset_configuration).
+1. Create an upload preset called **ugc-video-langs**. (You can use a different name, but if you do, you also need update the `uploadPreset` value in **cloudinary.ts**.) See instructions on how to [configure your upload preset](https://cloudinary.com/documentation/video_review_sample_project#upload_preset_configuration).
 1. Ensure that the **Notification URL** in your upload preset is set to:<br>`https://<your app's domain>/api/moderate`
 1. If running locally, run the development server:
    
@@ -33,7 +33,7 @@ To run the app yourself:
 
 ## Learn More
 
-Learn more about this app: [Cloudinary docs](https://cloudinary.com/documentation/profile_picture_sample_project).
+Learn more about this app: [Cloudinary docs](https://cloudinary.com/documentation/video_review_sample_project).
 
 To learn more about Next.js, take a look at the following resources:
 
