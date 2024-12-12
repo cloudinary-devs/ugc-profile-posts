@@ -54,6 +54,7 @@ export function CloudinaryVideoPlayer({ publicId }: CloudinaryVideoPlayerProps) 
         controls: true,
         chaptersButton: true,
         width: 600,
+        sourceTypes: ['webm','mp4'],
         posterOptions: {aspect_ratio: "16:9", crop: "fill", gravity: "auto", width: 600}
       })
 
