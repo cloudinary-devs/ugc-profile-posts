@@ -1,71 +1,96 @@
 import { NextResponse } from 'next/server'
 
-// This map will store the moderation results temporarily
-const moderationResults = new Map<string, { status: string, message: string }>()
+// This map will store the processing results temporarily
+const processingResults = new Map<string, {
+  moderation: { status: string, message: string },
+  autoChaptering: { status: string, message: string },
+  autoTranscription: { status: string, message: string },
+  eagerTransformation: { status: string, message: string }
+}>()
 
-// This endpoint is used to catch the webhook sent from Cloudinary when the moderation 
-// is complete.  It is also used by the frontend to find out the moderation result for
-// a particular uploaded asset.
 export async function POST(request: Request) {
-
   const data = await request.json()
-  
-  // Check if this is a webhook from Cloudinary
-  if (data.notification_type === 'moderation' || data.notification_type === 'moderation_summary') {
-    const { moderation_status, moderation_kind, asset_id } = data
+  console.log("Received webhook data:", data)
 
-    let status = 'pending'
-    let message = ''
-    
-    // Check the moderation status
+  const { asset_id, public_id, notification_type } = data
+
+  if (!processingResults.has(asset_id)) {
+    processingResults.set(asset_id, {
+      moderation: { status: 'pending', message: '' },
+      autoChaptering: { status: 'pending', message: '' },
+      autoTranscription: { status: 'pending', message: '' },
+      eagerTransformation: { status: 'pending', message: '' }
+    })
+  }
+
+  const result = processingResults.get(asset_id)!
+
+  if (notification_type === 'moderation' || notification_type === 'moderation_summary') {
+    const { moderation_status, moderation_kind } = data
+
     if (moderation_status === 'rejected') {
-      status = 'rejected'
-      if (moderation_kind === 'aws_rek') {
-        message = 'Your image was rejected due to unsuitable content'
-      } else if (moderation_kind === 'perception_point') {
-        message = 'Your image was rejected due to potential malware'
+      result.moderation = { 
+        status: 'rejected', 
+        message: moderation_kind === 'aws_rek_video' 
+          ? 'Your video was rejected due to unsuitable content'
+          : 'Your video was rejected due to potential malware'
       }
     } else if (moderation_status === 'approved') {
-      status = 'approved'
-      message = 'Image approved'
+      result.moderation = { status: 'approved', message: 'Video approved' }
+    }
+  } else if (notification_type === 'info') {
+    const { info_kind, info_status } = data
+
+    if (info_kind === 'auto_chaptering') {
+      result.autoChaptering = { 
+        status: info_status, 
+        message: info_status === 'failed' ? data.info_data : 'Chaptering completed'
+      }
+    } else if (info_kind === 'auto_transcription') {
+      result.autoTranscription = { 
+        status: info_status, 
+        message: info_status === 'failed' ? data.info_data : 'Transcription completed'
+      }
+    }
+  } else if (notification_type === 'eager') {
+    result.eagerTransformation = { status: 'complete', message: 'Eager transformation completed' }
+  }
+
+  processingResults.set(asset_id, result)
+
+  // If it's a request from our frontend
+  if (data.checkStatus) {
+    const processingResult = processingResults.get(asset_id)
+
+    if (!processingResult) {
+      return NextResponse.json({ status: 'pending', message: 'Processing in progress' })
     }
 
-    // Store the result
-    moderationResults.set(asset_id, { status, message })
+    const { moderation, autoChaptering, autoTranscription, eagerTransformation } = processingResult
 
-    return NextResponse.json({ success: true })
-  }
-
-  // If it's not a webhook, it's a request from our frontend
-  const { public_id, asset_id } = data
-
-  // Check if we have a moderation result for this asset
-  const moderationResult = moderationResults.get(asset_id)
-
-  if (!moderationResult) {
-    return NextResponse.json({ status: 'pending', message: 'Moderation in progress' })
-  }
-
-  // Clear the result from our temporary storage
-  moderationResults.delete(asset_id)
-
-  if (moderationResult.status === 'approved') {
-
-    let poorQuality = false
-
-    if (data.tags && data.tags.includes('poor_quality')) {
-      poorQuality = true
+    if (moderation.status === 'rejected') {
+      return NextResponse.json({ status: 'rejected', message: moderation.message })
     }
- 
-    return NextResponse.json({ 
-      status: 'approved',
-      poorQuality: poorQuality, 
-      publicId: public_id
-    })
-  } else {
-    return NextResponse.json({ 
-      status: 'rejected', 
-      message: moderationResult.message
-    })
+
+    if (moderation.status === 'approved' && 
+        (autoChaptering.status === 'complete' || autoChaptering.status === 'failed') &&
+        (autoTranscription.status === 'complete' || autoTranscription.status === 'failed') &&
+        eagerTransformation.status === 'complete') {
+      // Clear the result from our temporary storage
+      processingResults.delete(asset_id)
+
+      return NextResponse.json({ 
+        status: 'approved',
+        publicId: public_id,
+        autoChaptering: autoChaptering.status === 'complete',
+        autoTranscription: autoTranscription.status === 'complete',
+        eagerTransformationComplete: true
+      })
+    }
+
+    return NextResponse.json({ status: 'pending', message: 'Processing in progress' })
   }
+
+  return NextResponse.json({ success: true })
 }
+
