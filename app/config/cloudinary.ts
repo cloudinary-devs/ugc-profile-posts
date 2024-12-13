@@ -1,4 +1,4 @@
 export const CLOUDINARY_CONFIG = {
-    cloudName: 'cld-demo-ugc',
+    cloudName: 'MY_CLOUD_NAME',
     uploadPreset: 'ugc-video-langs'
   } as const
