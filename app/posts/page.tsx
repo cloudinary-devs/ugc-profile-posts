@@ -60,8 +60,23 @@ export default function MyPosts() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">My Posts</h1>
-      <p>Write a message in the text field and optionally upload an image before posting.</p>
-      <p className="mb-6">We&apos;ll check that the image is not offensive and doesn&apos;t contain malware.</p>
+      <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md flex items-center justify-center gap-2 w-full mb-4 text-sm">
+          <svg
+            className="w-8 h-8 text-blue-600"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zm-9-3a1 1 0 112 0v4a1 1 0 11-2 0V7zm1 6a1.25 1.25 0 100 2.5A1.25 1.25 0 0010 13z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <p>
+            Write a message in the text field and optionally upload an image before posting.
+            <p>We&apos;ll check that the image is not offensive and doesn&apos;t contain malware.</p>
+          </p>
+        </div>
       <form onSubmit={handleSubmit} className="mb-4 space-y-2">
         <textarea
           value={newPost}
@@ -92,7 +107,7 @@ export default function MyPosts() {
             buttonText="Upload Image"
             onClick={handleImageUpload}
           />
-          <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded transition duration-300">
+          <button type="submit" className="bg-green-600 rounded-full w-[100px] h-[36px] flex items-center justify-center cursor-pointer text-[16px] gap-[4px] px-[28px] py-[8px] no-underline font-bold transition duration-300 transition duration-300">
             Post
           </button>
         </div>
